@@ -1,4 +1,4 @@
-import { ethers } from 'hardhat'
+import { ethers, run } from 'hardhat'
 import { TestToken__factory } from '../typechain'
 
 async function main() {
@@ -8,6 +8,12 @@ async function main() {
   const c = await C.deploy()
   await c.deployed()
   console.log('TestToken deployed to:', c.address)
+
+  await run('verify:verify', {
+    address: c.address,
+    constructorArguments: [],
+    contract: 'contracts/TestToken.sol:TestToken'
+  })
 }
 
 main().catch((error) => {
