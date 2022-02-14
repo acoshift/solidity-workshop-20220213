@@ -1,11 +1,12 @@
 import * as dotenv from "dotenv";
 
-import { HardhatUserConfig, task } from "hardhat/config";
+import { HardhatUserConfig, task, subtask } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+const { getEtherscanEndpoints } = require("@nomiclabs/hardhat-etherscan/dist/src/network/prober")
 
 dotenv.config();
 
@@ -18,6 +19,20 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     console.log(account.address);
   }
 });
+
+const chainConfig: any = {
+  reitestnet: {
+    chainId: 55556,
+    urls: {
+      apiURL: "https://testnet.reiscan.com/api",
+      browserURL: "https://testnet.reiscan.com/",
+    }
+  }
+}
+
+subtask('verify:get-etherscan-endpoint').setAction(async (_, { network }) =>
+  getEtherscanEndpoints(network.provider, network.name, chainConfig)
+);
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -45,6 +60,7 @@ const config: HardhatUserConfig = {
       chainId: 55556,
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+
     },
   },
   gasReporter: {
@@ -52,7 +68,7 @@ const config: HardhatUserConfig = {
     currency: "USD",
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: process.env.ETHERSCAN_API_KEY || 'test',
   },
 };
 
